@@ -1,0 +1,6 @@
+{
+  "slideritem": {
+    "component": "SliderItem",
+    "composition": "children"
+  }
+}
