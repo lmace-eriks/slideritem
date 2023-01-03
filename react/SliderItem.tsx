@@ -1,25 +1,39 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { canUseDOM } from "vtex.render-runtime";
 
 // Styles
 import styles from "./styles.css";
 
 interface SliderItemProps {
+  titleTag: string
   title: string
   subtitle: string
   ctaText: string
   ctaLink: string
+  alt: string
   desktopImage: string
   mobileImage: string
   blockClass: string
+  imageLoading: "lazy" | "eager" | undefined
+  desktopWidth: number
+  desktopHeight: number
+  mobileWidth: number
+  mobileHeight: number
 }
 
-const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ title, subtitle, ctaText, ctaLink, desktopImage, mobileImage, blockClass }) => {
-  // const [openGate, setOpenGate] = useState(true);
-  // const [mobileImagePass, setMobileImagePass] = useState(false);
-  // const [desktopImagePass, setDesktopImagePass] = useState(false);
+const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, alt, title, subtitle, ctaText, ctaLink, desktopImage, mobileImage, blockClass, imageLoading, desktopWidth, desktopHeight, mobileWidth, mobileHeight }) => {
+  const openGate = useRef(true);
+  // const userDevice = useRef("");
+  const [userDevice, setUserDevice] = useState("");
+  const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Default to eagar loading for hero images - LM
+  imageLoading = imageLoading || "eager";
+
+  const defaultTag = "div";
+  const CustomTag: any = !titleTag ? `${defaultTag}` : `${titleTag}`;
 
   const mobileImageMaxWidth = useMemo(() => 450, []);
   const mobileImageMaxSize = useMemo(() => 50000, []);
@@ -27,20 +41,31 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ title, subti
   const desktopImageMaxWidth = useMemo(() => 1536, []);
   const desktopImageMaxSize = useMemo(() => 300000, []);
 
-  useEffect(() => {
-    // console.clear();
-    if (!canUseDOM) return;
+  desktopWidth = desktopWidth || desktopImageMaxWidth;
+  desktopHeight = desktopHeight || 864;
+  mobileWidth = mobileWidth || mobileImageMaxWidth;
+  mobileHeight = mobileHeight || 450;
 
+  useEffect(() => {
+    if (!openGate.current || !canUseDOM) return;
+    openGate.current = false;
+
+    getWindowSize();
     const windowLocation = window.location.href;
     const windowIsAdmin = windowLocation.includes("siteEditor=true");
-    setIsAdmin(windowIsAdmin);
 
-    if (windowIsAdmin) getMobileImage();
+    if (windowIsAdmin) {
+      setIsAdmin(windowIsAdmin);
+      getMobileImage();
+    }
+    setLoading(false);
   })
 
-  // useEffect(() => {
-  //   if (errorMessage) setMobileImagePass(false);
-  // }, [errorMessage])
+  const getWindowSize = () => {
+    if (!canUseDOM) return;
+    // userDevice.current = window.innerWidth <= 1025 ? "mobile" : "desktop";
+    setUserDevice(window.innerWidth <= 1025 ? "mobile" : "desktop");
+  }
 
   const bytesToKb = (b: number) => b / 1000;
 
@@ -72,7 +97,6 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ title, subti
 
     // Mobile Image is not broken URL
     if (!fileFormatPassed) {
-      console.log(imageType);
       setErrorMessage(`Mobile Image Not Found.`);
       return;
     }
@@ -140,26 +164,35 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ title, subti
     setErrorMessage("");
   }
 
+  const imageSize = (dim: string) => {
+    // return "" + userDevice.current === "mobile" ? dim === "w" ? mobileWidth : mobileHeight : dim === "w" ? desktopWidth : desktopHeight;
+    return "" + userDevice === "mobile" ? dim === "w" ? mobileWidth : mobileHeight : dim === "w" ? desktopWidth : desktopHeight;
+  }
+
   const ValidSlider = () => (
     <div className={`${styles.sliderContainer}--${blockClass}`}>
       <div className={`${styles.sliderWrapper}--${blockClass}`}>
         <div className={`${styles.textContainer}--${blockClass}`}>
-          <div className={`${styles.sliderTitle}--${blockClass}`}>{title}</div>
+          {title && <CustomTag className={`${styles.sliderTitle}--${blockClass}`}>{title}</CustomTag>}
           {subtitle && <div className={`${styles.sliderSubtitle}--${blockClass}`}>{subtitle}</div>}
-          <a href={ctaLink} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</a>
+          {ctaText && <a href={ctaLink} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</a>}
         </div>
         <div className={`${styles.sliderImageContainer}--${blockClass}`}>
           <picture>
-            <source media="(min-width:1026px)" srcSet={desktopImage} />
-            <source media="(max-width:1025px)" srcSet={mobileImage} />
-            <img src={mobileImage} alt={title} className={`${styles.sliderImage}--${blockClass}`} />
+            {/* @ts-expect-error */}
+            <source media="(min-width:1026px)" srcSet={desktopImage} width={desktopWidth} height={desktopHeight} />
+            {/* @ts-expect-error */}
+            <source media="(max-width:1025px)" srcSet={mobileImage} width={mobileWidth} height={mobileHeight} />
+            <img src={mobileImage} alt={alt || title} loading={imageLoading} className={`${styles.sliderImage}--${blockClass}`} width={imageSize("w")} height={imageSize("h")} />
           </picture>
         </div>
         <div className={`${styles.backgroundImageContainer}--${blockClass}`}>
           <picture>
-            <source media="(min-width:1026px)" srcSet={desktopImage} />
-            <source media="(max-width:1025px)" srcSet={mobileImage} />
-            <img src={mobileImage} className={`${styles.backgroundImage}--${blockClass}`} />
+            {/* @ts-expect-error */}
+            <source media="(min-width:1026px)" srcSet={desktopImage} width={desktopWidth} height={desktopHeight} />
+            {/* @ts-expect-error */}
+            <source media="(max-width:1025px)" srcSet={mobileImage} width={mobileWidth} height={mobileHeight} />
+            <img src={mobileImage} loading={imageLoading} className={`${styles.backgroundImage}--${blockClass}`} alt="" width={imageSize("w")} height={imageSize("h")} />
           </picture>
         </div>
       </div>
@@ -168,11 +201,21 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ title, subti
 
   const ErrorElement = () => (
     <div className={`${styles.sliderContainer}--${blockClass}`}>
-      <div style={{ color: "red", fontWeight: "bold", textAlign: "center", padding: "1rem", margin: "5rem" }}>{errorMessage}</div>
+      <div style={{ color: "red", fontWeight: "bold", textAlign: "center", padding: "1rem", margin: "5rem" }}>
+        {errorMessage}
+      </div>
     </div>
   )
 
-  return !isAdmin ? <ValidSlider /> : errorMessage ? <ErrorElement /> : <ValidSlider />
+  const LoadingElement = () => (
+    <img data-device={userDevice} style={{ maxHeight: userDevice === "desktop" ? "60vh" : "100%" }} src="https://eriksbikeshop.vtexassets.com/arquivos/white-loading.gif" width={imageSize("w")} height={imageSize("h")} />
+  )
+
+  if (loading) {
+    return <LoadingElement />
+  } else {
+    return !isAdmin ? <ValidSlider /> : errorMessage ? <ErrorElement /> : <ValidSlider />;
+  }
 }
 
 SliderItem.schema = {
@@ -183,7 +226,12 @@ SliderItem.schema = {
     title: {
       title: "Title",
       type: "string",
-      description: "Required | Title Text."
+      description: "Optional | Title Text."
+    },
+    titleTag: {
+      title: "Title Element Tag",
+      type: "string",
+      description: "h1, h2... Defaults to div."
     },
     subtitle: {
       title: "Sub Title",
@@ -193,12 +241,17 @@ SliderItem.schema = {
     ctaText: {
       title: "Call To Action Text",
       type: "string",
-      description: "Required | Button Text."
+      description: "Optional | Button Text."
     },
     ctaLink: {
       title: "Call To Action Link",
       type: "string",
-      description: "Required | Button Link."
+      description: "Required with Call To Action | Button Link."
+    },
+    alt: {
+      title: "Alt Text",
+      type: "string",
+      description: "Optional | Alt Text for image. Defaults to Title text if blank."
     },
     desktopImage: {
       title: "Desktop Image Path",
