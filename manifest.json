@@ -1,7 +1,7 @@
 {
   "vendor": "eriksbikeshop",
   "name": "slideritem",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "title": "SliderItem",
   "description": "SliderItem component",
   "defaultLocale": "pt-BR",
