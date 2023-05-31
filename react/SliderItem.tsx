@@ -34,6 +34,7 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, al
 
       <img src={mobileImage}
         alt={props.backgroundImage ? "" : alt || title}
+        loading={loadingPriority ? "eager" : "lazy"}
         // @ts-expect-error
         fetchPriority={props.backgroundImage ? "low" : loadingPriority ? "high" : "low"}
         className={props.backgroundImage ? `${styles.backgroundImage}--${blockClass}` : `${styles.sliderImage}--${blockClass}`}
