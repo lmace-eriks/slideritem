@@ -10,6 +10,7 @@ interface SliderItemProps {
   subtitle: string
   ctaText: string
   ctaLink: string
+  ctaAriaLabel: string
   alt: string
   desktopImage: string
   mobileImage: string
@@ -21,7 +22,7 @@ interface PictureTagProps {
   backgroundImage: boolean
 }
 
-const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, alt, title, subtitle, ctaText, ctaLink, desktopImage, mobileImage, blockClass, loadingPriority }) => {
+const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, alt, title, subtitle, ctaText, ctaLink, desktopImage, mobileImage, blockClass, ctaAriaLabel, loadingPriority }) => {
   const defaultTag = "div";
   const CustomTag: any = !titleTag ? `${defaultTag}` : `${titleTag}`;
 
@@ -54,7 +55,7 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, al
         <div className={`${styles.textContainer}--${blockClass}`}>
           {title && <CustomTag className={`${styles.sliderTitle}--${blockClass}`}>{title}</CustomTag>}
           {subtitle && <div className={`${styles.sliderSubtitle}--${blockClass}`}>{subtitle}</div>}
-          {ctaText && <Link href={ctaLink} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</Link>}
+          {ctaText && <Link href={ctaLink} aria-label={ctaAriaLabel} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</Link>}
         </div>
       </div>
     </div>
@@ -106,6 +107,12 @@ SliderItem.schema = {
       title: "Call To Action Link",
       type: "string",
       description: "Required with Call To Action | Button Link.",
+      widget: { "ui:widget": "textarea" }
+    },
+    ctaAriaLabel: {
+      title: "Call To Action Aria Label",
+      type: "string",
+      description: "Required with Call To Action | Button Link. Gives screen readers more context than simply 'Click Here'.",
       widget: { "ui:widget": "textarea" }
     },
     alt: {
