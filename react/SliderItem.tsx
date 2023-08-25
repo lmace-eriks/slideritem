@@ -61,7 +61,8 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, al
     </div>
   )
 
-  return <ValidSlider />;
+  // Last minute hack. Creative gave us an image with a CTA burned into the image. - LM
+  return !!ctaText ? <ValidSlider /> : <Link href={ctaLink} className={styles.fullSliderLink}><ValidSlider /></Link>;
 }
 
 SliderItem.schema = {
