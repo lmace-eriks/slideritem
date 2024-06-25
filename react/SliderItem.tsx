@@ -55,14 +55,14 @@ const SliderItem: StorefrontFunctionComponent<SliderItemProps> = ({ titleTag, al
         <div className={`${styles.textContainer}--${blockClass}`}>
           {title && <CustomTag className={`${styles.sliderTitle}--${blockClass}`}>{title}</CustomTag>}
           {subtitle && <div className={`${styles.sliderSubtitle}--${blockClass}`}>{subtitle}</div>}
-          {ctaText && <Link href={ctaLink} aria-label={ctaAriaLabel} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</Link>}
+          {ctaText && <Link to={ctaLink} aria-label={ctaAriaLabel} className={`${styles.sliderCallToAction}--${blockClass}`}>{ctaText}</Link>}
         </div>
       </div>
     </div>
   )
 
   // Last minute hack. Creative gave us an image with a CTA burned into the image. - LM
-  return !!ctaText ? <ValidSlider /> : <Link href={ctaLink} className={styles.fullSliderLink}><ValidSlider /></Link>;
+  return !!ctaText ? <ValidSlider /> : <Link to={ctaLink} className={styles.fullSliderLink}><ValidSlider /></Link>;
 }
 
 SliderItem.schema = {
